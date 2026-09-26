@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-harness/
+test-results/
+playwright-report/
+.DS_Store
+# Trickcal-derived pack: generated locally, not published until the owner decides (plan §10)
+src/assets/packs/trickcal/
+.env.local
+.env.*.local
+
+# Local transcoding inputs (e.g. the 「キュウイ！」 clip)
+assets-src/

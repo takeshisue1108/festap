@@ -1,0 +1,47 @@
+:root {
+  --ink: #111;
+  --paper: #fff;
+  --yellow: #ffec00;
+  --purple: #c86ce6;
+  --green-track: #a8d99c;
+  --green-knob: #4a7443;
+  --gutter: 12px;
+  --kb-border: 3px; /* shared by the keyboard and the tonic bar's axis so they line up */
+  font-family: "Helvetica Neue", "Hiragino Sans", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--paper);
+}
+
+body {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: none;
+}
+
+#app {
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+}

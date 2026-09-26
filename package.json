@@ -1,0 +1,31 @@
+{
+  "name": "festap",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "dev:trickcal": "VITE_ASSET_PACK=trickcal vite --host",
+    "build": "vue-tsc --noEmit && vite build && node tools/check-dist.mjs",
+    "build:trickcal": "vue-tsc --noEmit && VITE_ASSET_PACK=trickcal vite build && node tools/check-dist.mjs",
+    "preview": "vite preview --host",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:render": "vite build && FESTAP_HARNESS=1 vite build --outDir dist-harness && playwright test",
+    "assets": "node tools/build-assets.mjs"
+  },
+  "dependencies": {
+    "vue": "^3.5.43"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.1",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "typescript": "~5.9",
+    "vite": "^8.3.0",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^5.0.1",
+    "vue-tsc": "^3.3.11",
+    "workbox-window": "^7.4.1"
+  }
+}

@@ -1,16 +1,19 @@
 :root {
-  --ink: #111;
-  --paper: #fff;
+  /* Night mode (spec update 2026-09-26): --ink is the line/text color, --paper the surface color,
+     same as before but with their values swapped, so every component that referenced them by role
+     goes dark without any per-component change. */
+  --ink: #f2f0ef;
+  --paper: #121212;
   --yellow: #ffec00;
   --purple: #c86ce6;
-  --green-track: #a8d99c;
-  --green-knob: #4a7443;
+  --green-track: #3c5a37;
+  --green-knob: #8fd382;
   --gutter: 12px;
   --kb-border: 3px; /* shared by the keyboard and the tonic bar's axis so they line up */
   font-family: "Helvetica Neue", "Hiragino Sans", system-ui, sans-serif;
   color: var(--ink);
   background: var(--paper);
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,

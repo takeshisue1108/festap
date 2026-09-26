@@ -9,26 +9,23 @@ const minor = computed(() => store.scaleMode === "minor");
 
 <template>
   <div class="scale" :class="{ minor }" role="group" aria-label="Scale">
-    <button class="cap major-cap" aria-label="Major" @pointerdown="controller.setScale('major')">M</button>
     <button
       class="pill"
       role="switch"
       :aria-checked="minor"
+      aria-label="Major / Minor"
       @pointerdown="controller.setScale(minor ? 'major' : 'minor')"
     >
       <span class="knob" />
       <span class="label">{{ minor ? "Minor" : "Major" }}</span>
     </button>
-    <button class="cap minor-cap" aria-label="Minor" @pointerdown="controller.setScale('minor')">m</button>
   </div>
 </template>
 
 <style scoped>
 .scale {
   --on: var(--yellow);
-  display: grid;
-  grid-template-columns: 1fr 2.6fr 1fr;
-  gap: 4%;
+  display: flex;
   align-items: center;
   height: 100%;
   max-height: 64px;
@@ -36,22 +33,9 @@ const minor = computed(() => store.scaleMode === "minor");
 .scale.minor {
   --on: var(--purple);
 }
-.cap {
-  aspect-ratio: 1;
-  border-radius: 22%;
-  font-size: clamp(22px, 7cqw, 38px);
-  line-height: 1;
-  display: grid;
-  place-items: center;
-}
-.major-cap {
-  background: var(--on);
-}
-.minor-cap {
-  background: var(--purple);
-}
 .pill {
   position: relative;
+  width: 100%;
   height: 78%;
   border-radius: 999px;
   background: var(--on);

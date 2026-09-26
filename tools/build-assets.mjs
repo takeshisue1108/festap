@@ -14,11 +14,9 @@ const SOURCES = {
   bass: { dir: join(PYA, "banks/daya88"), from: 28, to: 52 },
   gestures: { dir: join(PYA, "banks/festa88"), from: 48, to: 96 },
   oneshots: {
-    vivi: join(PYA, "voice/vie.mp3"), // candidate for 「ぐえっ！」 — confirm by ear (plan §9)
+    vivi: join(PYA, "voice/vie.mp3"), // Vivi's own hit-reaction voice, the source vivi_drums was cut from
     clap: join(PYA, "banks/vivi_drums/039_clap.wav"),
-    kyui: "assets-src/kyui", // 「キュウイ！」 not cut yet; drop kyui.{wav,mp3,m4a} here and rerun
   },
-  art: { vivi: join(VAULT, "projects/trickal/game/characters/dragon/vivi/icon_vivi.png") },
 };
 
 function ffmpeg(args) {
@@ -51,7 +49,7 @@ function firstExisting(base) {
 }
 
 rmSync(OUT, { recursive: true, force: true });
-for (const d of ["drums", "bass", "gestures", "oneshots", "art"]) mkdirSync(join(OUT, d), { recursive: true });
+for (const d of ["drums", "bass", "gestures", "oneshots"]) mkdirSync(join(OUT, d), { recursive: true });
 
 let count = 0;
 for (const [note, src] of midiFiles(SOURCES.drums)) {
@@ -74,11 +72,6 @@ for (const [name, base] of Object.entries(SOURCES.oneshots)) {
     continue;
   }
   toM4a(src, join(OUT, "oneshots", `${name}.m4a`), { maxSec: 1.5 });
-  count++;
-}
-for (const [name, src] of Object.entries(SOURCES.art)) {
-  if (!existsSync(src)) continue;
-  ffmpeg(["-i", src, "-vf", "scale=256:-1", join(OUT, "art", `${name}.png`)]);
   count++;
 }
 

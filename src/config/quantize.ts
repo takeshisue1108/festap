@@ -20,3 +20,6 @@ export const SCHEDULER_LOOKAHEAD_SEC = 0.12;
 
 /** Added to the audio time of a clap before anchoring a new tempo (plan §6.2). */
 export const INPUT_LATENCY_COMPENSATION_SEC = 0;
+
+/** Spec update 2026-09-26: hold a gesture pad this long to latch it into repeating every beat. */
+export const GESTURE_HOLD_THRESHOLD_MS = 350;

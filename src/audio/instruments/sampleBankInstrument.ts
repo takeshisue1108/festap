@@ -32,6 +32,6 @@ export class SampleBankInstrument implements Instrument {
     src.connect(amp).connect(this.engine.buses[this.bus]);
     src.start(when);
     src.stop(stopAt);
-    return new Voice(when, amp, [src]);
+    return new Voice(when, amp, [src], [{ param: src.playbackRate, base: src.playbackRate.value }]);
   }
 }

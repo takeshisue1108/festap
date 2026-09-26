@@ -41,7 +41,12 @@ export class SynthInstrument implements Instrument {
       osc.stop(stopAt);
       return osc;
     });
-    return new Voice(when, amp, oscs);
+    return new Voice(
+      when,
+      amp,
+      oscs,
+      oscs.map((osc) => ({ param: osc.frequency, base: osc.frequency.value })),
+    );
   }
 }
 

@@ -1,6 +1,6 @@
 import { SampleDrumKit, SynthDrumKit } from "../audio/instruments/drumKit";
 import type { DrumKit, Instrument } from "../audio/instruments/instrument";
-import { synthGue, synthKyui, type OneShotSound } from "../audio/instruments/oneShot";
+import { synthGue, type OneShotSound } from "../audio/instruments/oneShot";
 import { SampleBankInstrument } from "../audio/instruments/sampleBankInstrument";
 import { BASS_SYNTH, LEAD_SYNTH, SynthInstrument } from "../audio/instruments/synthInstrument";
 import { loadBuffer, loadBufferMap } from "../audio/loader";
@@ -11,7 +11,6 @@ export interface Sounds {
   drums: DrumKit;
   bass: Instrument;
   gestures: Instrument;
-  kyui: OneShotSound;
   vivi: OneShotSound;
   clap: OneShotSound;
 }
@@ -23,7 +22,6 @@ export function synthSounds(engine: AudioEngine): Sounds {
     drums: kit,
     bass: new SynthInstrument(engine, "bass", BASS_SYNTH),
     gestures: new SynthInstrument(engine, "gestures", LEAD_SYNTH),
-    kyui: synthKyui,
     vivi: synthGue,
     clap: (_e, when, bus) => kit.clap(when, 0.9, bus),
   };
@@ -60,14 +58,12 @@ export async function loadPackSounds(
       tick();
     }
   };
-  const [kyui, vivi, clap, drumMap] = await Promise.all([
-    one(pack.oneShots.kyui),
+  const [vivi, clap, drumMap] = await Promise.all([
     one(pack.oneShots.vivi),
     one(pack.oneShots.clap),
     loadBufferMap(ctx, pack.drums, tick),
   ]);
   const early: Partial<Sounds> = {};
-  if (kyui) early.kyui = kyui;
   if (vivi) early.vivi = vivi;
   if (clap) early.clap = clap;
   if (drumMap.size) early.drums = new SampleDrumKit(engine, drumMap, new SynthDrumKit(engine));

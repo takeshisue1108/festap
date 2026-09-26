@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
 import { controller } from "../app/controller";
 import type { GesturePadSlot } from "../config/gestureMapping";
-import { loadActivePack } from "../packs/activePack";
 import ClapButton from "./ClapButton.vue";
 import GesturePad from "./GesturePad.vue";
 import Keyboard from "./Keyboard.vue";
@@ -15,8 +13,6 @@ import Veils from "./Veils.vue";
 
 // Layout after the concept sketch (plan §6.11); the sketch's own pixels are not used.
 const slots: GesturePadSlot[] = [0, 1, 2];
-const art = ref<{ kyui?: string; vivi?: string }>({});
-onMounted(async () => (art.value = (await loadActivePack()).art));
 
 // Any touch resumes audio if iOS suspended it (e.g. after backgrounding).
 function wake(): void {
@@ -40,9 +36,9 @@ function wake(): void {
       <TonicBar />
       <div class="right">
         <GesturePad v-for="s in slots" :key="s" :slot="s" />
-        <div class="oneshots">
-          <OneShotPad id="kyui" :art="art.kyui" />
-          <OneShotPad id="vivi" :art="art.vivi" />
+        <div class="lowerRight">
+          <GesturePad :slot="3" />
+          <OneShotPad />
         </div>
       </div>
     </main>
@@ -90,10 +86,10 @@ function wake(): void {
   gap: 3.2%;
   min-height: 0;
 }
-.oneshots {
+.lowerRight {
   display: grid;
-  grid-template-columns: 1fr 2.2fr;
-  gap: 6%;
+  grid-template-rows: 1fr 1fr;
+  gap: 3.2%;
   min-height: 0;
 }
 </style>

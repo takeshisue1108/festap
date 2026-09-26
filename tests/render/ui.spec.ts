@@ -23,7 +23,7 @@ test("one screen, no scroll, every region visible", async ({ page }) => {
   }));
   expect(sw).toBeLessThanOrEqual(w);
   expect(sh).toBeLessThanOrEqual(h);
-  for (const sel of [".scale", ".meter", ".big-clap", ".part.drum", ".part.bass", ".keys", ".tonic", ".gesture", ".oneshot.kyui", ".oneshot.vivi"]) {
+  for (const sel of [".scale", ".meter", ".big-clap", ".part.drum", ".part.bass", ".keys", ".tonic", ".gesture", ".oneshot"]) {
     const box = await page.locator(sel).first().boundingBox();
     expect(box, sel).not.toBeNull();
     expect(box!.y + box!.height).toBeLessThanOrEqual(h + 0.5);
@@ -173,12 +173,11 @@ test("pads accept presses and Auto toggles; one-shots can be spammed", async ({ 
   await tapCenter(page, ".part.bass .auto");
   await expect(page.locator(".part.drum .auto")).toHaveAttribute("aria-checked", "true");
   await expect(page.locator(".part.bass .auto")).toHaveAttribute("aria-checked", "true");
-  for (const sel of [".part.drum .pad", ".part.bass .pad", ".gesture >> nth=0", ".gesture >> nth=1", ".gesture >> nth=2"]) {
+  for (const sel of [".part.drum .pad", ".part.bass .pad", ".gesture >> nth=0", ".gesture >> nth=1", ".gesture >> nth=2", ".gesture >> nth=3"]) {
     await tapCenter(page, sel);
   }
   for (let i = 0; i < 20; i++) {
-    await tapCenter(page, ".oneshot.kyui");
-    await tapCenter(page, ".oneshot.vivi");
+    await tapCenter(page, ".oneshot");
   }
   await page.waitForTimeout(800);
   await page.screenshot({ path: "test-results/screen-playing.png" });

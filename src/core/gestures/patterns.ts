@@ -3,7 +3,7 @@ import { midiAtOrAbove, mod, pentatonicSteps } from "../theory";
 import type { MusicalContext } from "../transport/context";
 
 // Spec §10.2. Patterns are data in a registry; pads map to IDs in config/gestureMapping.ts.
-export type GesturePatternId = "simple_one_beat" | "complex_arpeggio" | "third_gesture";
+export type GesturePatternId = "simple_one_beat" | "complex_arpeggio" | "third_gesture" | "fourth_gesture";
 
 export interface MusicalGesture {
   pattern: GesturePatternId;
@@ -88,8 +88,25 @@ export const thirdGesture: GesturePattern = {
   },
 };
 
+/** D. A four-note broken-chord bounce (root, fifth, third, octave), all inside the beat. */
+export const fourthGesture: GesturePattern = {
+  id: "fourth_gesture",
+  render(_ctx, chord, durationBeats) {
+    const up = chordTonesUp(chord, GESTURE_FLOOR, 4);
+    const order = [0, 2, 1, 3];
+    const slot = durationBeats / order.length;
+    return order.map((idx, i) => ({
+      offsetBeats: i * slot,
+      durBeats: slot * 1.2,
+      midi: up[idx],
+      vel: i === order.length - 1 ? 0.75 : 0.5,
+    }));
+  },
+};
+
 export const gesturePatterns: Record<GesturePatternId, GesturePattern> = {
   simple_one_beat: simpleOneBeat,
   complex_arpeggio: complexArpeggio,
   third_gesture: thirdGesture,
+  fourth_gesture: fourthGesture,
 };

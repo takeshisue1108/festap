@@ -1,7 +1,7 @@
 import { combine, type AudioEngine, type Handle } from "../audio/engine";
 import { OneShotPlayer } from "../audio/instruments/oneShot";
 import { Scheduler } from "../audio/scheduler";
-import { gestureMapping, GESTURE_POLYPHONY_PER_PAD, type GesturePadSlot } from "../config/gestureMapping";
+import { GESTURE_PAD_SLOTS, gestureMapping, GESTURE_POLYPHONY_PER_PAD, type GesturePadSlot } from "../config/gestureMapping";
 import { MIN_LEAD_SEC, onsetPolicies, SCHEDULER_LOOKAHEAD_SEC } from "../config/quantize";
 import type { ClapCaptureResult } from "../core/clap/calculateRhythmFromClaps";
 import { autoBassNote, contextualBassNote } from "../core/generators/bass";
@@ -20,6 +20,12 @@ export const BASS_PART = "bass";
 // Auto bass grid: 8ths. (The Auto drum grid is autoDrumSubdivision, next to the drum rules.)
 const autoBassSubdivision = () => 2;
 
+// A held gesture pad repeats once per beat (spec update 2026-09-26); one AutoPart per pad slot.
+const gestureHoldSubdivision = () => 1;
+function gestureHoldPartId(slot: GesturePadSlot): string {
+  return `gesture-hold-${slot}`;
+}
+
 /**
  * The musical heart, free of Vue and DOM: turns intents into scheduled sound (plan §1).
  * Manual intents: accept now → resolve the next musical onset → decide what to play there → schedule.
@@ -32,6 +38,8 @@ export class Performer {
 
   private lastBass: number | null = null;
   private gestureVoices = new Map<GesturePadSlot, Handle[]>();
+  /** Bass and gesture voices that might still be sounding, for the tonic bar to bend (spec update 2026-09-26). */
+  private liveMelodic: { handle: Handle; endsAt: number }[] = [];
   private readonly oneShots: OneShotPlayer;
   private readonly claps: OneShotPlayer;
 
@@ -63,9 +71,37 @@ export class Performer {
         const note = autoBassNote(ctx, this.harmony.chordAt(ctx));
         if (!note) return [];
         this.lastBass = note.midi;
-        return [this.sounds.bass.play(note.midi, step.time, note.durBeats * ctx.beatDurationSec, note.vel)];
+        const dur = note.durBeats * ctx.beatDurationSec;
+        return [this.trackMelodic(this.sounds.bass.play(note.midi, step.time, dur, note.vel), step.time, dur)];
       },
     });
+    for (const slot of GESTURE_PAD_SLOTS) {
+      this.scheduler.addPart({
+        id: gestureHoldPartId(slot),
+        subdivisionFor: gestureHoldSubdivision,
+        render: (step) => [this.renderGesture(slot, buildMusicalContext(step, this.key))],
+      });
+    }
+  }
+
+  /** Shared by a manual tap and a held pad's automatic repeat. */
+  private renderGesture(slot: GesturePadSlot, ctx: MusicalContext): Handle {
+    const gesture = gestureMapping[slot];
+    const events = gesturePatterns[gesture.pattern].render(ctx, this.harmony.chordAt(ctx), gesture.durationBeats);
+    const beat = ctx.beatDurationSec;
+    const voices = events.map((e) => {
+      const when = ctx.time + e.offsetBeats * beat;
+      const dur = e.durBeats * beat;
+      return this.trackMelodic(this.sounds.gestures.play(e.midi, when, dur, e.vel), when, dur);
+    });
+    return combine(ctx.time, voices);
+  }
+
+  /** Registered so the tonic bar can slide whatever is currently sounding (spec update 2026-09-26). */
+  private trackMelodic(handle: Handle, when: number, durSec: number): Handle {
+    this.liveMelodic.push({ handle, endsAt: when + durSec + 0.4 });
+    if (this.liveMelodic.length > 48) this.liveMelodic.shift();
+    return handle;
   }
 
   /** Where a manual intent will sound, and the musical context there. */
@@ -90,7 +126,8 @@ export class Performer {
     const ctx = this.resolve("bass", requestedAt);
     const note = contextualBassNote(ctx, this.harmony.chordAt(ctx), this.lastBass);
     this.lastBass = note.midi;
-    this.sounds.bass.play(note.midi, ctx.time, note.durBeats * ctx.beatDurationSec, note.vel);
+    const dur = note.durBeats * ctx.beatDurationSec;
+    this.trackMelodic(this.sounds.bass.play(note.midi, ctx.time, dur, note.vel), ctx.time, dur);
     return ctx.time;
   }
 
@@ -98,12 +135,8 @@ export class Performer {
   triggerGesture(slot: GesturePadSlot, requestedAt: number): number {
     const gesture = gestureMapping[slot];
     const ctx = this.resolve("instrumental_gesture", requestedAt);
-    const events = gesturePatterns[gesture.pattern].render(ctx, this.harmony.chordAt(ctx), gesture.durationBeats);
+    const handle = this.renderGesture(slot, ctx);
     const beat = ctx.beatDurationSec;
-    const handle = combine(
-      ctx.time,
-      events.map((e) => this.sounds.gestures.play(e.midi, ctx.time + e.offsetBeats * beat, e.durBeats * beat, e.vel)),
-    );
     const live = (this.gestureVoices.get(slot) ?? []).filter((h) => h.when + beat * gesture.durationBeats > this.now());
     live.push(handle);
     while (live.length > GESTURE_POLYPHONY_PER_PAD) live.shift()!.cancel();
@@ -111,9 +144,21 @@ export class Performer {
     return ctx.time;
   }
 
-  /** Spec §10 one-shots: immediate, never quantized. */
-  playOneShot(id: "kyui" | "vivi"): void {
-    this.oneShots.play(this.sounds[id]);
+  /** Spec update 2026-09-26: long-press latches a pad into repeating every beat until tapped again. */
+  setGestureHold(slot: GesturePadSlot, on: boolean): void {
+    this.scheduler.setEnabled(gestureHoldPartId(slot), on, this.now());
+  }
+
+  /** Spec update 2026-09-26: the tonic bar slides whatever is currently sounding, instead of a separate preview tone. */
+  bendPitch(deltaSemitones: number, at: number): void {
+    const now = this.now();
+    this.liveMelodic = this.liveMelodic.filter((m) => m.endsAt > now);
+    for (const m of this.liveMelodic) m.handle.bend?.(deltaSemitones, at);
+  }
+
+  /** Spec §10 one-shot: immediate, never quantized. */
+  playVivi(): void {
+    this.oneShots.play(this.sounds.vivi);
   }
 
   /** Clap-capture feedback: immediate, never quantized (spec §10.7). */

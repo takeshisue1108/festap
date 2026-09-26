@@ -1,6 +1,5 @@
 import { AudioClock } from "../audio/clock";
 import { AudioEngine } from "../audio/engine";
-import { PitchPreview } from "../audio/instruments/pitchPreview";
 import type { GesturePadSlot } from "../config/gestureMapping";
 import { INPUT_LATENCY_COMPENSATION_SEC, SCHEDULER_INTERVAL_MS } from "../config/quantize";
 import { reduceClap, type ClapEvent } from "../core/clap/clapCaptureMachine";
@@ -18,8 +17,9 @@ class Controller {
   private engine: AudioEngine | null = null;
   private performer: Performer | null = null;
   private clock: AudioClock | null = null;
-  private preview: PitchPreview | null = null;
   private starting: Promise<void> | null = null;
+  /** Semitone position the tonic bar drag started from, so bendPitch gets a relative delta. */
+  private tonicDragOrigin: number | null = null;
 
   /** First touch (plan §6.1). Safe to call repeatedly; later calls just resume a suspended context. */
   start(): Promise<void> {
@@ -29,7 +29,6 @@ class Controller {
       await engine.unlock();
       this.engine = engine;
       this.clock = new AudioClock(engine.ctx as AudioContext);
-      this.preview = new PitchPreview(engine);
       const performer = new Performer(engine, synthSounds(engine), {
         startTime: engine.now + 0.05,
         bpm: store.bpm,
@@ -63,7 +62,6 @@ class Controller {
       // Plan §6.5 / spec §14.1: backgrounding aborts a capture and silences what has not started.
       this.dispatchClap({ type: "ABORT" });
       this.performer.scheduler.cancelFuture(this.engine.now);
-      this.preview?.stopNow();
       void this.engine.live?.suspend();
     } else {
       void this.resume();
@@ -90,18 +88,21 @@ class Controller {
 
   tonicDragStart(pitch: number): void {
     store.tonicDragPitch = pitch;
-    this.preview?.start(pitch);
+    this.tonicDragOrigin = pitch;
   }
 
+  /** Spec update 2026-09-26: no preview tone; slide whatever is already sounding instead. */
   tonicDragMove(pitch: number): void {
     store.tonicDragPitch = pitch;
-    this.preview?.glide(pitch);
+    if (this.tonicDragOrigin !== null && this.performer && this.engine) {
+      this.performer.bendPitch(pitch - this.tonicDragOrigin, this.engine.now);
+    }
   }
 
   /** Spec §5.3–5.4: snap to the nearest semitone; that pitch class becomes the tonic. */
   tonicDragEnd(pitch: number): void {
     const pc = snapToSemitone(pitch);
-    this.preview?.release(Math.round(pitch));
+    this.tonicDragOrigin = null;
     store.tonicDragPitch = null;
     store.tonicBarPitch = Math.min(12, Math.max(0, Math.round(pitch)));
     store.tonic = pc;
@@ -180,10 +181,15 @@ class Controller {
     this.performer?.setBassAuto(on);
   }
 
-  // ---- one-shots (immediate) ----
+  /** Spec update 2026-09-26: long-press latches a gesture pad; tapping it again cuts it off. */
+  setGestureHold(slot: GesturePadSlot, on: boolean): void {
+    this.performer?.setGestureHold(slot, on);
+  }
 
-  oneShot(id: "kyui" | "vivi"): void {
-    this.performer?.playOneShot(id);
+  // ---- one-shot (immediate) ----
+
+  playVivi(): void {
+    this.performer?.playVivi();
   }
 }
 

@@ -1,10 +1,12 @@
 // Web Audio plumbing only; no music rules here (plan §5.1).
 
-export type BusName = "drums" | "bass" | "gestures" | "oneshots" | "clap" | "preview";
+export type BusName = "drums" | "bass" | "gestures" | "oneshots" | "clap";
 
 export interface Handle {
   when: number;
   cancel(): void;
+  /** Slide this voice's pitch by `deltaSemitones`, if it can (a plain combined Handle cannot). */
+  bend?(deltaSemitones: number, at: number): void;
 }
 
 const BUS_GAIN: Record<BusName, number> = {
@@ -13,7 +15,6 @@ const BUS_GAIN: Record<BusName, number> = {
   gestures: 0.7,
   oneshots: 1.0,
   clap: 0.8,
-  preview: 0.5,
 };
 
 export class AudioEngine {
@@ -103,6 +104,8 @@ export class Voice implements Handle {
     readonly when: number,
     private readonly out: AudioNode,
     private readonly sources: AudioScheduledSourceNode[],
+    /** AudioParams that control this voice's pitch (oscillator frequency or sample playbackRate), with their starting value. */
+    private readonly pitchParams: { param: AudioParam; base: number }[] = [],
   ) {}
 
   cancel(): void {
@@ -114,6 +117,12 @@ export class Voice implements Handle {
         // already stopped
       }
     }
+  }
+
+  /** Tonic-bar drag (spec update 2026-09-26): glide the pitch this voice is already sounding at. */
+  bend(deltaSemitones: number, at: number, timeConstant = 0.03): void {
+    const ratio = Math.pow(2, deltaSemitones / 12);
+    for (const p of this.pitchParams) p.param.setTargetAtTime(p.base * ratio, at, timeConstant);
   }
 }
 

@@ -1,17 +1,44 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { controller } from "../app/controller";
 import { gestureGlyph, gestureMapping, type GesturePadSlot } from "../config/gestureMapping";
+import { GESTURE_HOLD_THRESHOLD_MS } from "../config/quantize";
 import { usePress } from "./usePress";
 
 // Spec §10: an instrumental one-beat gesture, quantized to the next musical onset.
+// Spec update 2026-09-26: a tap plays once (unchanged); holding long enough latches it into
+// repeating every beat, even after release, until the pad is tapped again to cut it off.
 const props = defineProps<{ slot: GesturePadSlot }>();
 const glyph = computed(() => gestureGlyph[gestureMapping[props.slot].pattern]);
 const { pressed, sounding, down, up, flashAt } = usePress();
+const holding = ref(false);
+let holdTimer: number | null = null;
+
+function clearHoldTimer(): void {
+  if (holdTimer !== null) {
+    window.clearTimeout(holdTimer);
+    holdTimer = null;
+  }
+}
 
 function trigger(e: PointerEvent): void {
   down();
+  if (holding.value) {
+    holding.value = false;
+    controller.setGestureHold(props.slot, false);
+    return;
+  }
   flashAt(controller.gesture(props.slot, e));
+  holdTimer = window.setTimeout(() => {
+    holdTimer = null;
+    holding.value = true;
+    controller.setGestureHold(props.slot, true);
+  }, GESTURE_HOLD_THRESHOLD_MS);
+}
+
+function release(): void {
+  up();
+  clearHoldTimer();
 }
 
 // Pictograms after the sketch's three waveforms (drawn fresh; the sketch itself is not shipped).
@@ -31,26 +58,28 @@ const tangle = [
   "M120,-5 C140,30 150,50 170,65",
   "M165,-5 C150,20 185,45 200,62",
 ];
+const spiral = "M-10,30 Q10,0 30,30 Q50,60 70,30 Q90,0 110,30 Q130,60 150,30 Q170,0 190,30 Q210,60 230,30";
 </script>
 
 <template>
   <button
     class="gesture"
-    :class="{ pressed, sounding }"
+    :class="{ pressed, sounding, holding }"
     :aria-label="`Gesture ${slot + 1}: ${gestureMapping[slot].pattern}`"
     @pointerdown="trigger"
-    @pointerup="up"
-    @pointercancel="up"
-    @pointerleave="up"
+    @pointerup="release"
+    @pointercancel="release"
+    @pointerleave="release"
   >
     <svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true">
       <path v-if="glyph === 'zigzag'" :d="zigzag" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="miter" />
       <template v-else-if="glyph === 'sheaf'">
         <path v-for="(d, i) in sheaf" :key="i" :d="d" fill="none" stroke="currentColor" stroke-width="1.4" />
       </template>
-      <template v-else>
+      <template v-else-if="glyph === 'tangle'">
         <path v-for="(d, i) in tangle" :key="i" :d="d" fill="none" stroke="currentColor" stroke-width="4" />
       </template>
+      <path v-else :d="spiral" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" />
     </svg>
   </button>
 </template>
@@ -77,5 +106,8 @@ svg {
 }
 .sounding {
   background: var(--yellow);
+}
+.holding {
+  box-shadow: inset 0 0 0 4px var(--yellow);
 }
 </style>

@@ -37,34 +37,7 @@ export class OneShotPlayer {
   }
 }
 
-// ---- Placeholder voices (plan §10): synthesized stand-ins, always safe to publish. ----
-
-/** "kyu-i!": a rising two-syllable chirp. */
-export const synthKyui: OneShotSound = (engine, when, bus) => {
-  const ctx = engine.ctx;
-  const osc = ctx.createOscillator();
-  osc.type = "square";
-  osc.frequency.setValueAtTime(620, when);
-  osc.frequency.exponentialRampToValueAtTime(900, when + 0.08); // "kyu"
-  osc.frequency.setValueAtTime(1050, when + 0.1);
-  osc.frequency.exponentialRampToValueAtTime(1500, when + 0.3); // "i!"
-  const formant = ctx.createBiquadFilter();
-  formant.type = "bandpass";
-  formant.Q.value = 2;
-  formant.frequency.setValueAtTime(900, when);
-  formant.frequency.setValueAtTime(2600, when + 0.1);
-  const amp = ctx.createGain();
-  amp.gain.setValueAtTime(0, when);
-  amp.gain.linearRampToValueAtTime(0.9, when + 0.01);
-  amp.gain.setValueAtTime(0.9, when + 0.07);
-  amp.gain.linearRampToValueAtTime(0.25, when + 0.095);
-  amp.gain.linearRampToValueAtTime(1.0, when + 0.11);
-  amp.gain.setTargetAtTime(0, when + 0.26, 0.03);
-  osc.connect(formant).connect(amp).connect(bus);
-  osc.start(when);
-  osc.stop(when + 0.45);
-  return new Voice(when, amp, [osc]);
-};
+// ---- Placeholder voice (plan §10): synthesized stand-in, always safe to publish. ----
 
 /** "gue!": a short falling squawk with a growl. */
 export const synthGue: OneShotSound = (engine, when, bus) => {

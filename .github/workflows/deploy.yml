@@ -24,7 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      # The published site uses the Trickcal pack (Festa + VOICEVOX:No.7 sounds), by the owner's decision (2026-09-27).
+      - run: npm run build:trickcal
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

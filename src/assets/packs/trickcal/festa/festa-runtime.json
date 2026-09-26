@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "canvas": {
+    "width": 1170,
+    "height": 2532
+  },
+  "runtimeScale": 0.6666666666666666,
+  "mirrorAxisX": 585,
+  "fRef": {
+    "x": 970,
+    "y": 1089
+  },
+  "frames": [
+    {
+      "id": "01",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "01_composite.webp",
+          "x": 205,
+          "y": 569,
+          "w": 899,
+          "h": 1471
+        }
+      }
+    },
+    {
+      "id": "02",
+      "anchors": {
+        "fingertip": {
+          "x": 970,
+          "y": 1089
+        },
+        "shoulder": {
+          "x": 650,
+          "y": 1211
+        },
+        "bodyAnchor": {
+          "x": 585,
+          "y": 1261
+        },
+        "headCenter": {
+          "x": 485,
+          "y": 1011
+        }
+      },
+      "images": {
+        "composite": {
+          "file": "02_composite.webp",
+          "x": 199,
+          "y": 473,
+          "w": 917,
+          "h": 1646
+        }
+      }
+    },
+    {
+      "id": "03",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "03_composite.webp",
+          "x": 188,
+          "y": 475,
+          "w": 935,
+          "h": 1651
+        }
+      }
+    },
+    {
+      "id": "04",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "04_composite.webp",
+          "x": 178,
+          "y": 519,
+          "w": 945,
+          "h": 1587
+        }
+      }
+    },
+    {
+      "id": "05",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "05_composite.webp",
+          "x": 183,
+          "y": 495,
+          "w": 940,
+          "h": 1620
+        }
+      }
+    },
+    {
+      "id": "06",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "06_composite.webp",
+          "x": 186,
+          "y": 489,
+          "w": 937,
+          "h": 1623
+        }
+      }
+    },
+    {
+      "id": "07",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "07_composite.webp",
+          "x": 201,
+          "y": 443,
+          "w": 918,
+          "h": 1633
+        }
+      }
+    },
+    {
+      "id": "08",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "08_composite.webp",
+          "x": 203,
+          "y": 558,
+          "w": 912,
+          "h": 1480
+        }
+      }
+    },
+    {
+      "id": "09",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "09_composite.webp",
+          "x": 204,
+          "y": 556,
+          "w": 900,
+          "h": 1472
+        }
+      }
+    },
+    {
+      "id": "10",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "10_composite.webp",
+          "x": 194,
+          "y": 527,
+          "w": 866,
+          "h": 1511
+        }
+      }
+    },
+    {
+      "id": "11",
+      "anchors": null,
+      "images": {
+        "composite": {
+          "file": "11_composite.webp",
+          "x": 204,
+          "y": 556,
+          "w": 899,
+          "h": 1488
+        }
+      }
+    }
+  ]
+}

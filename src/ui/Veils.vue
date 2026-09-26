@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRegisterSW } from "virtual:pwa-register/vue";
 import { controller } from "../app/controller";
+import { loadActivePack } from "../packs/activePack";
 import { store } from "../state/store";
+
+// Credits the active pack's sources require (e.g. "VOICEVOX:No.7"), shown on the start screen.
+const credits = ref<string[]>([]);
+onMounted(async () => (credits.value = (await loadActivePack()).credits ?? []));
 
 // Clap capture overlay (spec §6.3): while capturing, any tap that is not the big clap is an input clap
 // and nothing underneath fires. The big clap button sits above this layer.
@@ -25,6 +30,7 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
     <div class="start-card">
       <div class="logo">festap</div>
       <div>Tap to start</div>
+      <div v-if="credits.length" class="credit">{{ credits.join(" / ") }}</div>
     </div>
   </div>
 
@@ -75,6 +81,11 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
   background: var(--accent);
   color: var(--on-accent);
   border-radius: 16px;
+}
+.credit {
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.75;
 }
 .rotate {
   display: none;

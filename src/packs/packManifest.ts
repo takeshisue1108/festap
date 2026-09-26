@@ -9,6 +9,8 @@ export interface AssetPack {
   gestures: Record<number, string>;
   /** Festa tap frames (vault festa_tap spec §10): runtime data URL and image URLs by file stem. */
   festa?: { data: string; images: Record<string, string> };
+  /** Credits the pack's sources require, shown on the start screen (e.g. "VOICEVOX:No.7"). */
+  credits?: string[];
 }
 
 /** Build a pack from Vite glob results laid out as <kind>/<name>.<ext>. */

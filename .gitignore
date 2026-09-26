@@ -4,8 +4,7 @@ dist-harness/
 test-results/
 playwright-report/
 .DS_Store
-# Trickcal-derived pack: generated locally, not published until the owner decides (plan §10)
-src/assets/packs/trickcal/
+# The Trickcal pack (src/assets/packs/trickcal/) is committed and published since 2026-09-27 (owner's decision, plan §10).
 .env.local
 .env.*.local
 

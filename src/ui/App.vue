@@ -22,10 +22,15 @@ function onGlobalPointerDown(e: PointerEvent): void {
   void controller.start();
   festa.poke(e);
 }
+
+// On iPhone (Safari and Chrome, both WebKit) only a finger lifting may start audio, so ask again then.
+function wake(): void {
+  void controller.start();
+}
 </script>
 
 <template>
-  <div class="app" @pointerdown.capture="onGlobalPointerDown">
+  <div class="app" @pointerdown.capture="onGlobalPointerDown" @pointerup.capture="wake" @click.capture="wake">
     <FestaOverlay :beat-at="(t: number) => controller.beatAt(t)" />
     <header class="top">
       <ScaleToggle class="scale" />

@@ -60,10 +60,13 @@ export class AudioEngine {
   }
 
   /**
-   * Must run inside a user gesture (iOS). Also asks Safari 17+ to ignore the ring/silent switch
-   * (plan §6.1) and plays one silent sample, which some iOS versions need to actually start output.
+   * Asks the context to start. Only a user gesture can do that, and on iPhone (WebKit, so also Chrome on
+   * iPhone) a finger going down (pointerdown / touchstart) does not count; a finger lifting (pointerup,
+   * touchend, click) does. So this never waits: it just asks, and the caller calls it again on the next
+   * gesture until whenRunning() resolves. Also asks Safari 17+ to ignore the ring/silent switch (plan §6.1)
+   * and plays one silent sample, which some iOS versions need to actually start output.
    */
-  async unlock(): Promise<void> {
+  unlock(): void {
     const nav = navigator as Navigator & { audioSession?: { type: string } };
     try {
       if (nav.audioSession) nav.audioSession.type = "playback";
@@ -71,12 +74,28 @@ export class AudioEngine {
       // older Safari: silent switch mutes Web Audio; nothing more we can do
     }
     const live = this.live;
-    if (!live) return;
+    if (!live || live.state === "running") return;
     const src = live.createBufferSource();
     src.buffer = live.createBuffer(1, 1, live.sampleRate);
     src.connect(live.destination);
     src.start();
-    if (live.state !== "running") await live.resume();
+    live.resume().catch(() => {
+      // not a gesture the browser accepts; the next touch tries again
+    });
+  }
+
+  /** Resolves once the context is running (at once for an offline context). */
+  whenRunning(): Promise<void> {
+    const live = this.live;
+    if (!live || live.state === "running") return Promise.resolve();
+    return new Promise((resolve) => {
+      const onChange = () => {
+        if (live.state !== "running") return;
+        live.removeEventListener("statechange", onChange);
+        resolve();
+      };
+      live.addEventListener("statechange", onChange);
+    });
   }
 
   /** One second of white noise, shared by all noise-based voices. */

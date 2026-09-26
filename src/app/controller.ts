@@ -21,13 +21,21 @@ class Controller {
   /** Semitone position the tonic bar drag started from, so bendPitch gets a relative delta. */
   private tonicDragOrigin: number | null = null;
 
-  /** First touch (plan §6.1). Safe to call repeatedly; later calls just resume a suspended context. */
+  /**
+   * Every touch calls this (plan §6.1), on the finger going down and again on it lifting. The first call
+   * creates the audio context; every call asks it to run, because on iPhone only the lift is allowed to
+   * start audio. Setup continues once the context is actually running.
+   */
   start(): Promise<void> {
-    if (this.starting) return this.resume();
+    if (this.starting) {
+      this.engine?.unlock();
+      return this.starting;
+    }
+    const engine = AudioEngine.createLive();
+    this.engine = engine;
+    engine.unlock();
     this.starting = (async () => {
-      const engine = AudioEngine.createLive();
-      await engine.unlock();
-      this.engine = engine;
+      await engine.whenRunning();
       this.clock = new AudioClock(engine.ctx as AudioContext);
       const performer = new Performer(engine, synthSounds(engine), {
         startTime: engine.now + 0.05,
@@ -51,11 +59,6 @@ class Controller {
     return this.starting;
   }
 
-  private async resume(): Promise<void> {
-    const live = this.engine?.live;
-    if (live && live.state !== "running") await live.resume();
-  }
-
   private onVisibility = () => {
     if (!this.engine || !this.performer) return;
     if (document.hidden) {
@@ -64,7 +67,7 @@ class Controller {
       this.performer.scheduler.cancelFuture(this.engine.now);
       void this.engine.live?.suspend();
     } else {
-      void this.resume();
+      this.engine.unlock(); // may be refused outside a gesture; the next touch unlocks it
     }
   };
 

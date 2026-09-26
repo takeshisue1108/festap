@@ -98,7 +98,8 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
 }
 .update {
   position: fixed;
-  z-index: 70;
+  /* Above the start veil (100), so a waiting update can be applied even if the start screen is stuck. */
+  z-index: 150;
   left: 50%;
   bottom: calc(env(safe-area-inset-bottom) + 6px);
   transform: translateX(-50%);

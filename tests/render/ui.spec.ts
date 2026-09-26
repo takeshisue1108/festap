@@ -13,6 +13,32 @@ async function tapCenter(page: Page, selector: string) {
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 }
 
+test("starts on a phone where only a finger lift may start audio (iPhone Safari and Chrome)", async ({ page }) => {
+  // WebKit on iPhone refuses AudioContext.resume() during pointerdown/touchstart and allows it during
+  // pointerup/touchend/click. Model that: the context starts suspended and resume() works only in those events.
+  await page.addInitScript(() => {
+    let gesture = false;
+    for (const type of ["pointerup", "touchend", "click"]) {
+      window.addEventListener(type, () => { gesture = true; setTimeout(() => (gesture = false), 0); }, { capture: true });
+    }
+    const Real = window.AudioContext;
+    class PhoneAudioContext extends Real {
+      private allowed = false;
+      constructor(options?: AudioContextOptions) { super(options); void super.suspend(); }
+      get state(): AudioContextState { return this.allowed ? super.state : "suspended"; }
+      resume(): Promise<void> {
+        if (!gesture) return Promise.reject(new DOMException("not a gesture", "NotAllowedError"));
+        this.allowed = true;
+        return super.resume().then(() => { this.dispatchEvent(new Event("statechange")); });
+      }
+    }
+    (window as unknown as { AudioContext: typeof AudioContext }).AudioContext = PhoneAudioContext;
+  });
+  await startApp(page); // one tap on "Tap to start" must be enough
+  await tapCenter(page, ".part.drum .pad");
+  await expect(page.locator(".part.drum .pad")).toHaveClass(/sounding/, { timeout: 2000 });
+});
+
 test("one screen, no scroll, every region visible", async ({ page }) => {
   await startApp(page);
   const { sw, sh, w, h } = await page.evaluate(() => ({

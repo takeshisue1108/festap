@@ -66,7 +66,7 @@ function toggleAuto(): void {
   transform: scale(0.92);
 }
 .pad.sounding {
-  background: var(--yellow);
+  background: var(--accent);
 }
 .auto {
   position: relative;
@@ -75,12 +75,13 @@ function toggleAuto(): void {
   max-height: 70px;
   max-width: 160px;
   border-radius: 999px;
-  border: 4px solid var(--yellow);
-  background: var(--paper);
+  border: 4px solid var(--accent);
+  background: var(--fill);
   transition: background 0.12s;
 }
 .auto.on {
-  background: var(--yellow);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .knob {
   position: absolute;
@@ -90,7 +91,7 @@ function toggleAuto(): void {
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--paper);
-  box-shadow: inset 0 0 0 3px var(--yellow);
+  box-shadow: inset 0 0 0 3px var(--accent);
 }
 .auto.on .knob {
   left: auto;

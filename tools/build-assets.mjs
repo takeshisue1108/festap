@@ -9,13 +9,16 @@ const VAULT = process.env.FESTAP_VAULT ?? "/Users/user/Library/CloudStorage/Goog
 const PYA = join(VAULT, "projects/pya-gakki");
 const OUT = "src/assets/packs/trickcal";
 
+// Every voice is VOICEVOX:No.7 (owner's decision, 2026-09-27); no game voices (vivi_drums, daya88, festa88, vie.mp3).
+// The No.7 banks are built in pya-gakki from No.7's singing and speech (see banks/no7_88 and banks/no7_drums manifests).
+// Publishing them requires the credit "VOICEVOX:No.7".
 const SOURCES = {
-  drums: join(PYA, "banks/vivi_drums"),
-  bass: { dir: join(PYA, "banks/daya88"), from: 28, to: 52 },
-  gestures: { dir: join(PYA, "banks/festa88"), from: 48, to: 96 },
+  drums: join(PYA, "banks/no7_drums"),
+  bass: { dir: join(PYA, "banks/no7_88"), from: 28, to: 52 },
+  gestures: { dir: join(PYA, "banks/no7_88"), from: 48, to: 96 },
   oneshots: {
-    vivi: join(PYA, "voice/vie.mp3"), // Vivi's own hit-reaction voice, the source vivi_drums was cut from
-    clap: join(PYA, "banks/vivi_drums/039_clap.wav"),
+    vivi: join(PYA, "voice/no7_gue.wav"), // No.7 saying 「ぐえっ！」
+    clap: join(PYA, "banks/no7_drums/039_clap.wav"),
   },
 };
 
@@ -48,7 +51,8 @@ function firstExisting(base) {
   return null;
 }
 
-rmSync(OUT, { recursive: true, force: true });
+// Only this script's own folders: festa/ in the same pack belongs to tools/build-festa.mjs. art/ is from earlier runs.
+for (const d of ["drums", "bass", "gestures", "oneshots", "art"]) rmSync(join(OUT, d), { recursive: true, force: true });
 for (const d of ["drums", "bass", "gestures", "oneshots"]) mkdirSync(join(OUT, d), { recursive: true });
 
 let count = 0;

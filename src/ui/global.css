@@ -4,8 +4,14 @@
      goes dark without any per-component change. */
   --ink: #f2f0ef;
   --paper: #121212;
-  --yellow: #ffec00;
-  --purple: #c86ce6;
+  /* Fill of a control. See-through, so Festa shows inside the controls while their lines stay on top. */
+  --fill: transparent;
+  /* "On" color: Festa's hair pink (owner, 2026-09-27; was yellow, then dark gold). White text on it would not
+     read (2.1:1), so anything written on it uses --on-accent (7.8:1). */
+  --accent: #f7858c;
+  --on-accent: #121212;
+  /* Minor: a medium blue, not too dark; white text on it reads (4.5:1). */
+  --minor: #2e6ad1;
   --green-track: #3c5a37;
   --green-knob: #8fd382;
   --gutter: 12px;

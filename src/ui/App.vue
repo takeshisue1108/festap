@@ -2,6 +2,8 @@
 import { controller } from "../app/controller";
 import type { GesturePadSlot } from "../config/gestureMapping";
 import ClapButton from "./ClapButton.vue";
+import { festa } from "./festa/festa";
+import FestaOverlay from "./festa/FestaOverlay.vue";
 import GesturePad from "./GesturePad.vue";
 import Keyboard from "./Keyboard.vue";
 import MeterDisplay from "./MeterDisplay.vue";
@@ -14,14 +16,17 @@ import Veils from "./Veils.vue";
 // Layout after the concept sketch (plan §6.11); the sketch's own pixels are not used.
 const slots: GesturePadSlot[] = [0, 1, 2];
 
-// Any touch resumes audio if iOS suspended it (e.g. after backgrounding).
-function wake(): void {
+// Every touch, before any control sees it: resume audio if iOS suspended it (this has to stay first, inside
+// the user gesture), then let Festa answer at the touch point without waiting for the quantized sound.
+function onGlobalPointerDown(e: PointerEvent): void {
   void controller.start();
+  festa.poke(e);
 }
 </script>
 
 <template>
-  <div class="app" @pointerdown.capture="wake">
+  <div class="app" @pointerdown.capture="onGlobalPointerDown">
+    <FestaOverlay :beat-at="(t: number) => controller.beatAt(t)" />
     <header class="top">
       <ScaleToggle class="scale" />
       <MeterDisplay class="meter" />
@@ -48,6 +53,9 @@ function wake(): void {
 
 <style scoped>
 .app {
+  /* Own stacking context, so Festa's canvas (z-index −1) paints above the page and below every control. */
+  position: relative;
+  isolation: isolate;
   box-sizing: border-box;
   /* Phone-shaped column; on a desktop browser the app stays portrait in the middle. */
   width: 100%;

@@ -57,14 +57,15 @@ const keys = computed(() =>
 .white {
   position: relative;
   border-bottom: 2px solid var(--ink);
-  background: var(--paper);
+  background: var(--fill);
   text-align: left;
 }
 .white:last-of-type {
   border-bottom: 0;
 }
 .white.current {
-  background: var(--yellow);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .chord {
   position: absolute;

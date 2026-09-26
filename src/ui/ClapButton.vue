@@ -47,7 +47,7 @@ const beatsSoFar = computed(() => (store.clap.type === "capturing" ? store.clap.
   line-height: 1;
 }
 .capturing {
-  background: var(--yellow);
+  background: var(--accent);
   box-shadow: 0 0 0 4px var(--ink);
   animation: pulse 0.8s ease-in-out infinite;
 }

@@ -32,13 +32,13 @@ test("one screen, no scroll, every region visible", async ({ page }) => {
   await page.screenshot({ path: "test-results/screen-major.png" });
 });
 
-test("Major/Minor toggle turns purple and keeps the tonic (spec §4)", async ({ page }) => {
+test("Major/Minor toggle turns blue and keeps the tonic (spec §4)", async ({ page }) => {
   await startApp(page);
   await tapCenter(page, ".scale .pill");
   await expect(page.locator(".scale .pill")).toHaveText("Minor");
   await expect
     .poll(() => page.locator(".scale .pill").evaluate((el) => getComputedStyle(el).backgroundColor))
-    .toBe("rgb(200, 108, 230)");
+    .toBe("rgb(46, 106, 209)");
   await expect(page.locator(".tonic .knob")).toHaveText("C");
   await page.screenshot({ path: "test-results/screen-minor.png" });
 });

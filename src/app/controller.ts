@@ -72,6 +72,15 @@ class Controller {
     return this.clock ? this.clock.perfToAudio(e.timeStamp) : 0;
   }
 
+  /**
+   * The beat audible at a performance.now() time, as a float (0 = bar 1, beat 1 of the current tempo), or null
+   * before audio starts. For visuals that follow the music, such as Festa's idle dance.
+   */
+  beatAt(perfMs: number): number | null {
+    if (!this.performer || !this.clock) return null;
+    return this.performer.tempoMap.positionAt(this.clock.perfToAudio(perfMs)).beatFloat;
+  }
+
   /** Run fn when audio time t is (roughly) audible — for visual flashes only. */
   atAudioTime(t: number, fn: () => void): void {
     if (!this.engine) return;

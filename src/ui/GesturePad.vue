@@ -92,7 +92,7 @@ const spiral = "M-10,30 Q10,0 30,30 Q50,60 70,30 Q90,0 110,30 Q130,60 150,30 Q17
   border: 3px solid var(--ink);
   border-radius: 999px;
   overflow: hidden;
-  background: var(--paper);
+  background: var(--fill);
   transition: transform 0.05s;
 }
 svg {
@@ -105,9 +105,10 @@ svg {
   transform: scale(0.97);
 }
 .sounding {
-  background: var(--yellow);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .holding {
-  box-shadow: inset 0 0 0 4px var(--yellow);
+  box-shadow: inset 0 0 0 4px var(--accent);
 }
 </style>

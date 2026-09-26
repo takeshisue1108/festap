@@ -12,7 +12,8 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:render": "vite build && FESTAP_HARNESS=1 vite build --outDir dist-harness && playwright test",
-    "assets": "node tools/build-assets.mjs"
+    "assets": "node tools/build-assets.mjs",
+    "festa": "node tools/build-festa.mjs"
   },
   "dependencies": {
     "vue": "^3.5.43"

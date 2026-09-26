@@ -55,7 +55,7 @@ function trigger(): void {
   border: 3px solid var(--ink);
   border-radius: 18px;
   overflow: hidden;
-  background: var(--paper);
+  background: var(--fill);
   display: grid;
   place-items: center;
   transition: transform 0.05s;

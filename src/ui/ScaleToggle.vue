@@ -3,7 +3,8 @@ import { computed } from "vue";
 import { controller } from "../app/controller";
 import { store } from "../state/store";
 
-// Spec §4: Major = yellow, Minor = the whole toggle turns purple. The tonic is kept.
+// Spec §4: Major = the accent color (Festa's hair pink), Minor = the whole toggle turns blue. The tonic is kept.
+// (Until 2026-09-27 these were yellow and purple; the owner found white text on them unreadable.)
 const minor = computed(() => store.scaleMode === "minor");
 </script>
 
@@ -24,14 +25,16 @@ const minor = computed(() => store.scaleMode === "minor");
 
 <style scoped>
 .scale {
-  --on: var(--yellow);
+  --on: var(--accent);
+  --on-text: var(--on-accent);
   display: flex;
   align-items: center;
   height: 100%;
   max-height: 64px;
 }
 .scale.minor {
-  --on: var(--purple);
+  --on: var(--minor);
+  --on-text: var(--ink);
 }
 .pill {
   position: relative;
@@ -39,6 +42,7 @@ const minor = computed(() => store.scaleMode === "minor");
   height: 78%;
   border-radius: 999px;
   background: var(--on);
+  color: var(--on-text);
   transition: background 0.12s;
 }
 .knob {

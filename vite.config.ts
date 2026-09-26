@@ -45,7 +45,16 @@ export default defineConfig({
   build: {
     // Keep audio as real files (cacheable, not base64 in JS); let Vite decide for everything else.
     assetsInlineLimit: (file: string) => (file.endsWith(".m4a") ? false : undefined),
-    ...(harness ? { rollupOptions: { input: { harness: resolve(import.meta.dirname, "harness/harness.html") } } } : {}),
+    ...(harness
+      ? {
+          rollupOptions: {
+            input: {
+              harness: resolve(import.meta.dirname, "harness/harness.html"),
+              festa: resolve(import.meta.dirname, "harness/festa.html"),
+            },
+          },
+        }
+      : {}),
   },
   test: {
     include: ["tests/unit/**/*.test.ts"],

@@ -38,7 +38,7 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgb(255 236 0 / 0.18);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
   display: grid;
   place-items: center;
 }
@@ -72,7 +72,8 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({ immediate: true });
   font-size: 44px;
   font-weight: 700;
   padding: 8px 20px;
-  background: var(--yellow);
+  background: var(--accent);
+  color: var(--on-accent);
   border-radius: 16px;
 }
 .rotate {
